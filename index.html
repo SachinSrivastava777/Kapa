@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff4ef">
+<title>A Little Birthday Surprise</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@400;500;600;700&display=swap');
+  :root{--ivory:#fff7f0;--cream:#fff0e8;--blush:#fbd5dc;--pink:#ef7195;--coral:#f28b86;--rose:#d83f76;--magenta:#8e174c;--ink:#642744}
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;overflow:hidden}
+  body{font-family:"DM Sans",sans-serif;background:var(--ivory);color:var(--ink)}
+  button,input{font:inherit}
+  .scene{position:fixed;inset:0;display:grid;place-items:center;overflow:hidden;opacity:0;visibility:hidden;transform:scale(1.025);transition:opacity 1.25s ease,transform 1.7s cubic-bezier(.2,.7,.1,1),visibility 1.25s;isolation:isolate}
+  .scene.active{opacity:1;visibility:visible;transform:scale(1)}
+  .scene::before{content:"";position:absolute;inset:-20%;z-index:-2;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,#fff9f5 0%,transparent 58%)}
+  .opening{background:radial-gradient(ellipse at 50% 45%,#fff 0%,#fff6f1 42%,#f9dfe2 100%)}
+  .title-scene{background:radial-gradient(ellipse at 50% 45%,#f58eae 0%,#eb6594 45%,#c93472 100%);color:#fff8f6}
+  .tree-scene{background:radial-gradient(ellipse at 50% 44%,#fffdf8 0%,#fff4eb 54%,#f8dfdc 100%)}
+  .final-scene{background:radial-gradient(ellipse at 50% 38%,#fffdf9 0%,#fff1e9 52%,#f5d7dd 100%)}
+  .content{position:relative;z-index:3;text-align:center;width:min(92vw,850px);padding:24px}
+  .eyebrow{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;opacity:.76;margin-bottom:20px}
+  h1,h2,p{margin-top:0}
+  h1,h2{font-family:"Playfair Display",Georgia,serif;font-weight:500;letter-spacing:-.035em}
+  h1{font-size:clamp(3.1rem,10vw,7.7rem);line-height:.98;margin-bottom:24px}
+  h2{font-size:clamp(2.2rem,6vw,4.6rem);line-height:1.04;margin-bottom:20px}
+  .subtitle{font-size:clamp(.96rem,2.3vw,1.15rem);line-height:1.8;max-width:560px;margin:0 auto 30px;color:inherit;opacity:.82}
+  .start-btn{border:0;border-radius:999px;padding:16px 28px;background:linear-gradient(120deg,#d9437b,#f08b9e);color:white;box-shadow:0 12px 34px #d65a8040;cursor:pointer;transition:transform .25s,box-shadow .25s;letter-spacing:.015em}
+  .start-btn:hover{transform:translateY(-3px);box-shadow:0 17px 38px #d65a8055}
+  .start-btn:focus-visible,.music-toggle:focus-visible{outline:3px solid #8e174c;outline-offset:4px}
+  .heart-wrap{width:clamp(130px,25vw,220px);aspect-ratio:1;margin:0 auto 28px;display:grid;place-items:center;filter:drop-shadow(0 12px 24px #e85d8c45);animation:heartBeat 2.1s ease-in-out infinite}
+  .heart{width:72%;height:72%;overflow:visible}
+  .heart path{fill:url(#heartGradient);stroke:#ffb8c9;stroke-width:1.2}
+  .heart-glow{position:absolute;width:75%;height:75%;border-radius:50%;background:#ff8eae55;filter:blur(28px);z-index:-1}
+  .caption{font-family:"Playfair Display",Georgia,serif;font-size:clamp(1.25rem,3.2vw,1.8rem);font-style:italic;margin-bottom:26px}
+  .title-scene .content{opacity:0;transform:translateY(22px);transition:opacity 1.1s ease .2s,transform 1.2s ease .2s}
+  .title-scene.active .content{opacity:1;transform:translateY(0)}
+  .title-scene h1{ text-shadow:0 6px 32px #8b12453a}
+  .title-rule{width:72px;height:1px;background:#fff9;margin:0 auto 24px}
+  .tree-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
+  .tree-ground{position:absolute;bottom:-6vh;left:50%;transform:translateX(-50%);width:min(110vw,1100px);height:22vh;background:radial-gradient(ellipse at center,#f2bfc5aa 0%,#f2bfc500 70%);z-index:0}
+  .tree-caption{position:absolute;top:7%;left:0;right:0;z-index:4;text-align:center;opacity:0;transform:translateY(12px);transition:opacity 1s,transform 1s}
+  .tree-scene.active .tree-caption{opacity:1;transform:translateY(0)}
+  .tree-caption p{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-size:clamp(1.1rem,3vw,1.65rem);color:#9c4565}
+  .final-scene .content{max-width:720px;opacity:0;transform:translateY(18px);transition:opacity 1.3s ease .4s,transform 1.4s ease .4s}
+  .final-scene.active .content{opacity:1;transform:translateY(0)}
+  .final-message{font-size:clamp(1rem,2.5vw,1.2rem);line-height:1.95;max-width:580px;margin:0 auto 22px;color:#8d4b64;white-space:pre-line}
+  .signature{font-family:"Playfair Display",Georgia,serif;font-size:clamp(1.35rem,3.4vw,1.9rem);font-style:italic;color:#bd3d72;margin-top:24px}
+  .small-date{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:#b06b81;margin-top:20px}
+  .music-ui{position:fixed;right:max(18px,env(safe-area-inset-right));top:max(18px,env(safe-area-inset-top));z-index:20;display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid #d97b9b40;border-radius:999px;background:#fffaf5c9;backdrop-filter:blur(12px);box-shadow:0 6px 22px #87345112;color:#8c3157;opacity:0;pointer-events:none;transition:opacity .4s}
+  .music-ui.visible{opacity:1;pointer-events:auto}
+  .music-toggle{border:0;background:transparent;color:inherit;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0;font-size:.76rem}
+  .bars{display:flex;align-items:center;gap:2px;height:16px}
+  .bars i{display:block;width:2px;height:5px;border-radius:2px;background:#d34b7c}
+  .playing .bars i{animation:equalize .8s ease-in-out infinite alternate}
+  .playing .bars i:nth-child(2){animation-delay:-.4s}.playing .bars i:nth-child(3){animation-delay:-.2s}.playing .bars i:nth-child(4){animation-delay:-.55s}
+  .volume{width:64px;accent-color:#d34b7c;cursor:pointer}
+  .particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}
+  .particle{position:absolute;bottom:-30px;left:var(--x);font-size:var(--size);color:var(--color);opacity:0;animation:floatUp var(--duration) linear var(--delay) infinite;filter:drop-shadow(0 3px 8px #d45c8330)}
+  .sparkle{position:absolute;left:var(--x);top:var(--y);width:4px;height:4px;border-radius:50%;background:#fff8f4;box-shadow:0 0 12px 3px #fff9;opacity:0;animation:twinkle var(--duration) ease-in-out var(--delay) infinite}
+  .petal{position:absolute;top:-25px;left:var(--x);width:var(--w);height:calc(var(--w)*1.45);border-radius:80% 10% 80% 10%;background:var(--color);opacity:.65;transform:rotate(var(--rot));animation:fall var(--duration) linear var(--delay) infinite}
+  .replay{border:1px solid #d98aa2aa;background:#fff8f5a8;color:#a53b66;border-radius:999px;padding:10px 18px;cursor:pointer;font-size:.82rem;transition:background .2s}
+  .replay:hover{background:#fff}
+  .tree-note{font-size:.76rem;letter-spacing:.16em;text-transform:uppercase;color:#b87a8e}
+  @keyframes heartBeat{0%,100%{transform:scale(1)}8%{transform:scale(1.045)}16%{transform:scale(1)}24%{transform:scale(1.025)}34%{transform:scale(1)}}
+  @keyframes floatUp{0%{transform:translate3d(0,0,0) rotate(0);opacity:0}12%{opacity:.65}85%{opacity:.45}100%{transform:translate3d(var(--drift),-115vh,0) rotate(220deg);opacity:0}}
+  @keyframes twinkle{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:.85;transform:scale(1.2)}}
+  @keyframes fall{0%{transform:translate3d(0,-10vh,0) rotate(var(--rot));opacity:0}10%{opacity:.7}100%{transform:translate3d(var(--drift),115vh,0) rotate(calc(var(--rot) + 460deg));opacity:0}}
+  @keyframes equalize{from{height:4px}to{height:15px}}
+  .reduced-motion *, .reduced-motion *::before,.reduced-motion *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+  @media(max-width:600px){.music-ui{gap:7px;padding:8px 10px}.volume{width:45px}.music-label{display:none}.tree-caption{top:8%}.content{padding:18px}.final-scene .content{padding-top:45px}.tree-svg{height:86%;top:9%}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<!-- Audio file location: assets/birthday-song.mp3. The included song starts at 00:30. -->
+<audio id="birthdayAudio" preload="auto" loop="false" src="assets/birthday-song.mp3"></audio>
+
+<div class="music-ui" id="musicUI" aria-label="Music controls">
+  <button class="music-toggle" id="musicToggle" type="button" aria-label="Pause music">
+    <span class="bars" id="musicBars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="music-label" id="musicLabel">Music on</span>
+  </button>
+  <input class="volume" id="volume" type="range" min="0" max="1" step=".05" value=".55" aria-label="Music volume">
+</div>
+
+<section class="scene opening active" id="scene1" aria-label="Birthday surprise opening">
+  <div class="particles" id="openingParticles"></div>
+  <div class="content">
+    <div class="heart-wrap"><div class="heart-glow"></div>
+      <svg class="heart" viewBox="0 0 100 100" role="img" aria-label="A glowing pink heart">
+        <defs><linearGradient id="heartGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb2c5"/><stop offset=".55" stop-color="#f06d9a"/><stop offset="1" stop-color="#d83f76"/></linearGradient></defs>
+        <path d="M50 86 C41 76 9 56 9 32 C9 10 35 4 50 25 C65 4 91 10 91 32 C91 56 59 76 50 86Z"/>
+      </svg>
+    </div>
+    <div class="caption">A little surprise for you…</div>
+    <button class="start-btn" id="startBtn">Start the Surprise <span aria-hidden="true">♡</span></button>
+  </div>
+</section>
+
+<section class="scene title-scene" id="scene2" aria-label="Happy Birthday">
+  <div class="particles" id="titleParticles"></div>
+  <div class="content">
+    <div class="eyebrow">Today is all about you</div>
+    <h1>Happy<br>Birthday<span id="titleName"></span></h1>
+    <div class="title-rule"></div>
+    <p class="subtitle">A little magic, a thousand tiny wishes, and so much love — just for you.</p>
+  </div>
+</section>
+
+<section class="scene tree-scene" id="scene3" aria-label="A magical flower tree growing">
+  <div class="particles" id="treeParticles"></div>
+  <div class="tree-caption"><p>Some beautiful things grow from love…</p></div>
+  <div class="tree-ground"></div>
+  <svg class="tree-svg" id="treeSvg" viewBox="0 0 900 700" preserveAspectRatio="xMidYMid meet" aria-label="A tree growing into a heart-shaped canopy">
+    <defs>
+      <linearGradient id="trunkGradient" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#7d4b48"/><stop offset=".48" stop-color="#b7796e"/><stop offset="1" stop-color="#8c5550"/></linearGradient>
+      <filter id="softBloom" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <g id="branches" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="url(#trunkGradient)">
+      <path id="trunk" d="M450 665 C448 585 454 520 450 445" stroke-width="17" stroke-dasharray="250" stroke-dashoffset="250"/>
+      <path class="branch" d="M450 540 C410 505 376 466 335 420 C310 392 285 375 253 362" stroke-width="9" stroke-dasharray="260" stroke-dashoffset="260"/>
+      <path class="branch" d="M450 500 C490 462 528 424 558 385 C583 352 609 336 644 322" stroke-width="9" stroke-dasharray="250" stroke-dashoffset="250"/>
+      <path class="branch" d="M400 480 C380 437 370 395 370 353 C369 323 355 298 331 275" stroke-width="7" stroke-dasharray="230" stroke-dashoffset="230"/>
+      <path class="branch" d="M510 448 C525 405 527 370 520 332 C515 302 529 276 553 253" stroke-width="7" stroke-dasharray="220" stroke-dashoffset="220"/>
+      <path class="branch" d="M335 420 C324 389 325 360 310 336 M253 362 C235 342 213 336 194 336 M558 385 C582 368 602 365 626 368 M644 322 C663 303 685 301 706 306 M370 353 C354 335 342 320 343 299 M520 332 C537 312 550 295 550 275" stroke-width="4" stroke-dasharray="130" stroke-dashoffset="130"/>
+      <path class="branch" d="M450 445 C430 406 420 375 425 339 C429 309 416 286 396 267 M450 445 C471 402 480 369 473 333 C468 306 479 281 499 260" stroke-width="5" stroke-dasharray="190" stroke-dashoffset="190"/>
+    </g>
+    <g id="flowers" filter="url(#softBloom)"></g>
+  </svg>
+</section>
+
+<section class="scene final-scene" id="scene4" aria-label="Personal birthday message">
+  <div class="particles" id="finalParticles"></div>
+  <div class="content">
+    <div class="eyebrow">Made with all my heart</div>
+    <h2>For you, <span id="recipientName">my favourite person</span> ♡</h2>
+    <p class="final-message" id="personalMessage">May your days be filled with the kind of happiness you bring into the lives around you. May this new chapter be softer, brighter, and more beautiful than you imagined.</p>
+    <div class="signature">With love, <span id="senderName">Someone who cares</span></div>
+    <div class="small-date" id="specialDate"></div>
+    <p class="tree-note">May your wishes bloom, always.</p>
+    <button class="replay" id="replayBtn">Watch the magic again ↻</button>
+  </div>
+</section>
+
+<script>
+/* ===================== EASY PERSONALIZATION =====================
+   Change these values. Keep the song at assets/birthday-song.mp3,
+   or update SONG_URL to another relative path / hosted audio URL.
+*/
+const RECIPIENT_NAME = "Sunshine";
+const SENDER_NAME = "Aman";
+const PERSONAL_MESSAGE = "May your days be filled with the kind of happiness you bring into the lives around you. May this new chapter be softer, brighter, and more beautiful than you imagined. Keep shining exactly as you are — the world is lovelier with you in it.";
+const SONG_URL = "assets/birthday-song.mp3";
+const SPECIAL_DATE = ""; // Optional, e.g. "18 October 2026"
+/* The song begins at 20 seconds and fades in over 2 seconds. */
+const SONG_START_SECONDS = 20;
+const INITIAL_VOLUME = 0.55;
+const FADE_IN_SECONDS = 2;
+/* Timing in milliseconds. The last scene stays visible until replay. */
+const TITLE_DURATION = 6500;
+const TREE_GROW_DURATION = 2600;
+const BLOOM_DURATION = 7500;
+const FINAL_FADE_DELAY = 900;
+
+const audio = document.getElementById("birthdayAudio");
+const scenes = [...document.querySelectorAll(".scene")];
+const musicUI = document.getElementById("musicUI");
+const musicToggle = document.getElementById("musicToggle");
+const musicLabel = document.getElementById("musicLabel");
+const musicBars = document.getElementById("musicBars");
+const volumeControl = document.getElementById("volume");
+let started = false;
+let isPlaying = false;
+let sequenceTimers = [];
+let bloomTimers = [];
+let treeBuilt = false;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (reducedMotion) document.documentElement.classList.add("reduced-motion");
+
+document.getElementById("recipientName").textContent = RECIPIENT_NAME;
+document.getElementById("senderName").textContent = SENDER_NAME;
+document.getElementById("personalMessage").textContent = PERSONAL_MESSAGE;
+document.getElementById("titleName").textContent = RECIPIENT_NAME && RECIPIENT_NAME !== "Your Name" ? `, ${RECIPIENT_NAME}` : "";
+document.getElementById("specialDate").textContent = SPECIAL_DATE;
+audio.src = SONG_URL;
+audio.volume = INITIAL_VOLUME;
+volumeControl.value = INITIAL_VOLUME;
+audio.loop = false; // Never switch tracks or loop unexpectedly when this song ends.
+
+function later(fn, ms) {
+  const id = window.setTimeout(fn, reducedMotion ? Math.min(ms, 40) : ms);
+  sequenceTimers.push(id);
+  return id;
+}
+function showScene(id) {
+  scenes.forEach(s => s.classList.toggle("active", s.id === id));
+}
+function setMusicState(playing) {
+  isPlaying = playing;
+  musicUI.classList.add("visible");
+  musicBars.classList.toggle("playing", playing);
+  musicLabel.textContent = playing ? "Music on" : "Music paused";
+  musicToggle.setAttribute("aria-label", playing ? "Pause music" : "Resume music");
+}
+async function startMusic() {
+  // Start directly from the Start button gesture, begin silently, seek to 00:20,
+  // then fade up to the chosen volume over two seconds.
+  try {
+    audio.volume = 0;
+    const playPromise = audio.play();
+
+    const seekToStart = () => {
+      if (Number.isFinite(audio.duration) && audio.duration > SONG_START_SECONDS) {
+        try { audio.currentTime = SONG_START_SECONDS; }
+        catch (seekError) { console.warn("Could not seek to the requested song start time.", seekError); }
+      } else {
+        console.warn("Audio duration is unavailable or shorter than 20 seconds.");
+      }
+    };
+
+    if (audio.readyState >= 1) seekToStart();
+    else audio.addEventListener("loadedmetadata", seekToStart, { once: true });
+
+    await playPromise;
+    setMusicState(true);
+
+    const targetVolume = Number(volumeControl.value || INITIAL_VOLUME);
+    const fadeStart = performance.now();
+    if (reducedMotion) {
+      audio.volume = targetVolume;
+    } else {
+      const fadeStep = (now) => {
+        if (audio.paused) return;
+        const progress = Math.min(1, (now - fadeStart) / (FADE_IN_SECONDS * 1000));
+        audio.volume = Math.max(0, Math.min(1, targetVolume * progress));
+        if (progress < 1) requestAnimationFrame(fadeStep);
+      };
+      requestAnimationFrame(fadeStep);
+    }
+  } catch (error) {
+    audioError(error);
+  }
+}
+function audioError(error) {
+  console.warn("Birthday music could not be played. Check that the audio file exists at:", SONG_URL, error || "");
+  musicUI.classList.add("visible");
+  musicLabel.textContent = "Music unavailable";
+}
+audio.addEventListener("play", () => setMusicState(true));
+audio.addEventListener("pause", () => { if (started) setMusicState(false); });
+audio.addEventListener("error", () => audioError("Audio file missing or unsupported."));
+musicToggle.addEventListener("click", async () => {
+  if (audio.paused) {
+    try { await audio.play(); setMusicState(true); } catch (e) { audioError(e); }
+  } else audio.pause();
+});
+volumeControl.addEventListener("input", () => { audio.volume = Number(volumeControl.value); });
+
+function clearSequence() {
+  sequenceTimers.forEach(clearTimeout); sequenceTimers = [];
+  bloomTimers.forEach(clearTimeout); bloomTimers = [];
+}
+function makeParticles(containerId, type, count) {
+  const container = document.getElementById(containerId);
+  if (!container || container.dataset.built === "yes") return;
+  container.dataset.built = "yes";
+  const colors = type === "sparkle" ? ["#fff9f1","#ffd4df","#ffffff"] : ["#f6a2b8","#e96d91","#f3b0b7","#d9487b"];
+  for (let i=0;i<count;i++) {
+    const el = document.createElement("span");
+    if (type === "sparkle") {
+      el.className = "sparkle";
+      el.style.setProperty("--y", `${Math.random()*92}%`);
+      el.style.setProperty("--duration", `${2.2+Math.random()*3.5}s`);
+    } else if (type === "petal") {
+      el.className = "petal";
+      el.style.setProperty("--w", `${5+Math.random()*9}px`);
+      el.style.setProperty("--rot", `${Math.random()*360}deg`);
+      el.style.setProperty("--duration", `${8+Math.random()*12}s`);
+      el.style.setProperty("--drift", `${-90+Math.random()*180}px`);
+    } else {
+      el.className = "particle";
+      el.textContent = Math.random() > .48 ? "♡" : "✧";
+      el.style.setProperty("--size", `${10+Math.random()*20}px`);
+      el.style.setProperty("--duration", `${8+Math.random()*11}s`);
+      el.style.setProperty("--drift", `${-70+Math.random()*140}px`);
+    }
+    el.style.setProperty("--x", `${Math.random()*100}%`);
+    el.style.setProperty("--delay", `${-Math.random()*18}s`);
+    el.style.setProperty("--color", colors[Math.floor(Math.random()*colors.length)]);
+    container.appendChild(el);
+  }
+}
+makeParticles("openingParticles","heart",24);
+makeParticles("titleParticles","sparkle",48);
+makeParticles("treeParticles","petal",34);
+makeParticles("finalParticles","heart",28);
+
+function buildFlowerTree() {
+  if (treeBuilt) return;
+  treeBuilt = true;
+  const svgNS = "http://www.w3.org/2000/svg";
+  const group = document.getElementById("flowers");
+  // Hundreds of individual SVG blooms arranged within a heart-shaped canopy.
+  const points = [];
+  const total = reducedMotion ? 150 : 420;
+  for (let i=0;i<total;i++) {
+    // Heart equation mapped to a canopy roughly spanning x=160..740, y=115..410.
+    const t = Math.random()*Math.PI*2;
+    const r = Math.sqrt(Math.random());
+    const x0 = 16*Math.pow(Math.sin(t),3);
+    const y0 = 13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+    const x = 450 + x0*17.2*r;
+    const y = 292 - y0*11.2*r;
+    // Bias a few blossoms toward branch tips to make the canopy feel organically grown.
+    points.push({x,y,delay:Math.random()*BLOOM_DURATION,size:1.8+Math.random()*2.8,coral:Math.random()>.66});
+  }
+  points.sort((a,b)=>a.delay-b.delay);
+  points.forEach((p,i)=>{
+    const flower = document.createElementNS(svgNS,"g");
+    flower.setAttribute("transform",`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${Math.random()*360}) scale(0)`);
+    flower.setAttribute("opacity","0");
+    flower.dataset.transform = `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${Math.random()*360}) scale(1)`;
+    const color = p.coral ? (Math.random()>.5 ? "#f18b87":"#f6a1a0") : (Math.random()>.5 ? "#ed76a0":"#d94d83");
+    for(let k=0;k<5;k++){
+      const petal=document.createElementNS(svgNS,"ellipse");
+      petal.setAttribute("cx","0");petal.setAttribute("cy",String(-p.size*.95));
+      petal.setAttribute("rx",String(p.size*.52));petal.setAttribute("ry",String(p.size*.86));
+      petal.setAttribute("fill",color);petal.setAttribute("transform",`rotate(${k*72})`);
+      flower.appendChild(petal);
+    }
+    const center=document.createElementNS(svgNS,"circle");
+    center.setAttribute("r",String(p.size*.3));center.setAttribute("fill","#ffdca8");flower.appendChild(center);
+    group.appendChild(flower);
+    const timer=setTimeout(()=>{
+      flower.style.transition = reducedMotion ? "none" : "transform 850ms cubic-bezier(.2,.8,.2,1), opacity 700ms ease";
+      flower.setAttribute("transform",flower.dataset.transform);
+      flower.setAttribute("opacity",".96");
+    }, reducedMotion ? 0 : p.delay);
+    bloomTimers.push(timer);
+  });
+}
+function growBranches() {
+  const paths = [...document.querySelectorAll("#branches path")];
+  paths.forEach((path,i)=>{
+    const length = path.getTotalLength();
+    path.style.strokeDasharray = length;
+    path.style.strokeDashoffset = length;
+    path.style.transition = `stroke-dashoffset ${reducedMotion ? .01 : 1.3+i*.11}s ease-out`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>path.style.strokeDashoffset="0"));
+  });
+}
+function runSequence() {
+  clearSequence();
+  showScene("scene2");
+  later(()=>{
+    showScene("scene3");
+    growBranches();
+    buildFlowerTree();
+    later(()=> {
+      showScene("scene4");
+    }, TREE_GROW_DURATION + BLOOM_DURATION + FINAL_FADE_DELAY);
+  }, TITLE_DURATION);
+}
+document.getElementById("startBtn").addEventListener("click", async () => {
+  if (started) return;
+  started = true;
+  musicUI.classList.add("visible");
+  // Start playback directly inside the click gesture to satisfy browser autoplay rules.
+  await startMusic();
+  runSequence();
+});
+document.getElementById("replayBtn").addEventListener("click", () => {
+  // Replay the visuals only. Music position and playback are deliberately untouched.
+  clearSequence();
+  showScene("scene1");
+  started = true;
+  later(()=>runSequence(), 850);
+});
+audio.addEventListener("ended", () => {
+  setMusicState(false);
+  // Intentionally do not substitute another track or unexpectedly restart the song.
+});
+</script>
+</body>
+</html>
